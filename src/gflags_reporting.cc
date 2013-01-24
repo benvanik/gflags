@@ -126,7 +126,7 @@ static string PrintStringFlagsWithQuotes(const CommandLineFlagInfo& flag,
 // Goes to some trouble to make pretty line breaks.
 string DescribeOneFlag(const CommandLineFlagInfo& flag) {
   string main_part;
-  SStringPrintf(&main_part, "    -%s (%s)",
+  SStringPrintf(&main_part, "    --%s (%s)",
                 flag.name.c_str(),
                 flag.description.c_str());
   const char* c_string = main_part.c_str();
@@ -134,7 +134,8 @@ string DescribeOneFlag(const CommandLineFlagInfo& flag) {
   string final_string = "";
   int chars_in_line = 0;  // how many chars in current line so far?
   while (1) {
-    assert(chars_left == strlen(c_string));  // Unless there's a \0 in there?
+    // Unless there's a \0 in there?
+    assert(chars_left == static_cast<int>(strlen(c_string)));
     const char* newline = strchr(c_string, '\n');
     if (newline == NULL && chars_in_line+chars_left < kLineLength) {
       // The whole remainder of the string fits on this line
@@ -173,6 +174,8 @@ string DescribeOneFlag(const CommandLineFlagInfo& flag) {
   }
 
   // Append data type
+  StringAppendF(&final_string, "\n       ");
+  chars_in_line = 0;
   AddString(string("type: ") + flag.type, &final_string, &chars_in_line);
   // The listed default value will be the actual default from the flag
   // definition in the originating source file, unless the value has
@@ -291,7 +294,13 @@ static void ShowUsageWithFlagsMatching(const char *argv0,
             fprintf(stdout, "\n\n");   // put blank lines between directories
           first_directory = false;
         }
-        fprintf(stdout, "\n  Flags from %s:\n", flag->filename.c_str());
+        const char* filename = strrchr(flag->filename.c_str(), PATH_SEPARATOR);
+        if (filename) {
+          filename++;
+        } else {
+          filename = flag->filename.c_str();
+        }
+        fprintf(stdout, "\n  Flags from %s:\n", filename);
         last_filename = flag->filename;
       }
       // Now print this flag
