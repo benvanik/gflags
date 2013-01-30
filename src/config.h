@@ -15,10 +15,14 @@
 #define HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the <fnmatch.h> header file. */
+#ifndef _WIN32
 #define HAVE_FNMATCH_H 1
+#endif
 
 /* Define to 1 if you have the <inttypes.h> header file. */
+#ifndef _WIN32
 #define HAVE_INTTYPES_H 1
+#endif
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1

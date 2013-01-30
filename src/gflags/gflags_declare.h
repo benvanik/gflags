@@ -44,7 +44,7 @@
 #if 1
 #include <sys/types.h>      // the normal place u_int16_t is defined
 #endif
-#if 1
+#if 0
 #include <inttypes.h>       // a third place for uint16_t or u_int16_t
 #endif
 
