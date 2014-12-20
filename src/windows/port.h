@@ -62,7 +62,9 @@ extern GFLAGS_DLL_DECL int snprintf(char *str, size_t size,
 extern int GFLAGS_DLL_DECL safe_vsnprintf(char *str, size_t size,
                                              const char *format, va_list ap);
 #define vsnprintf(str, size, format, ap)  safe_vsnprintf(str, size, format, ap)
+#if !defined(va_copy)
 #define va_copy(dst, src)  (dst) = (src)
+#endif  // !defined(va_copy)
 #endif  /* #if !defined(__MINGW32__) && !defined(__MINGW64__) */
 
 inline void setenv(const char* name, const char* value, int) {
@@ -76,7 +78,7 @@ inline void setenv(const char* name, const char* value, int) {
     value = kFakeZero;
   // Apparently the semantics of putenv() is that the input
   // must live forever, so we leak memory here. :-(
-  const int nameval_len = strlen(name) + 1 + strlen(value) + 1;
+  const size_t nameval_len = strlen(name) + 1 + strlen(value) + 1;
   char* nameval = reinterpret_cast<char*>(malloc(nameval_len));
   snprintf(nameval, nameval_len, "%s=%s", name, value);
   _putenv(nameval);
