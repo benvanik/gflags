@@ -542,26 +542,15 @@ CommandLineFlag::~CommandLineFlag() {
 }
 
 const char* CommandLineFlag::CleanFileName() const {
-  // Compute top-level directory & file that this appears in
-  // search full path backwards.
-  // Stop going backwards at kRootDir; and skip by the first slash.
-  static const char kRootDir[] = "";    // can set this to root directory,
+  // This function has been used to strip off a common prefix from 
+  // flag source file names. Because flags can be defined in different 
+  // shared libraries, there may not be a single common prefix. 
+  // Further, this functionality hasn't been active for many years. 
+  // Need a better way to produce more user friendly help output or 
+  // "anonymize" file paths in help output, respectively. 
+  // Follow issue at: https://github.com/gflags/gflags/issues/86 
 
-  if (sizeof(kRootDir)-1 == 0)          // no prefix to strip
-    return filename();
-
-  const char* clean_name = filename() + strlen(filename()) - 1;
-  while ( clean_name > filename() ) {
-    if (*clean_name == PATH_SEPARATOR) {
-      if (strncmp(clean_name, kRootDir, sizeof(kRootDir)-1) == 0) {
-        clean_name += sizeof(kRootDir)-1;    // past root-dir
-        break;
-      }
-    }
-    --clean_name;
-  }
-  while ( *clean_name == PATH_SEPARATOR ) ++clean_name;  // Skip any slashes
-  return clean_name;
+  return filename();
 }
 
 void CommandLineFlag::FillCommandLineFlagInfo(
@@ -1026,8 +1015,7 @@ uint32 CommandLineFlagParser::ParseNewCommandLineFlags(int* argc, char*** argv,
     char* arg = (*argv)[i];
 
     // Like getopt(), we permute non-option flags to be at the end.
-    if (arg[0] != '-' ||           // must be a program argument
-        (arg[0] == '-' && arg[1] == '\0')) {  // "-" is an argument, not a flag
+	if (arg[0] != '-' || arg[1] == '\0') {	// must be a program argument "-" is an argument, not a flag
       memmove((*argv) + i, (*argv) + i+1, (*argc - (i+1)) * sizeof((*argv)[i]));
       (*argv)[*argc-1] = arg;      // we go last
       first_nonopt--;              // we've been pushed onto the stack
